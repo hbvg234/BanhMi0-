@@ -1,1 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1208">
+<title>HUST BANHMI 3D - Multiplayer</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="loading-screen">
+    <div class="loading-logo">🛺 HUST BANHMI 3D</div>
+    <div class="loading-bar"><div id="loading-fill"></div></div>
+    <div class="loading-text">Đang nướng bánh mì...</div>
+  </div>
 
+  <div id="start-screen" style="display:none;">
+    <div class="title-area">
+      <div class="game-logo">🛺</div>
+      <h1>HUST BANHMI</h1>
+      <p class="subtitle">BÁNH MÌ BÁCH KHOA 3D - MULTIPLAYER</p>
+    </div>
+
+    <div class="mp-panel">
+      <input id="input-nickname" class="mp-input" type="text" maxlength="20" placeholder="Tên người chơi (Nickname)">
+
+      <div class="mp-row">
+        <button id="btn-create-room" class="menu-btn primary" style="flex:1;">🆕 TẠO PHÒNG MỚI</button>
+      </div>
+
+      <div class="mp-row">
+        <input id="input-room-code" class="mp-input" type="text" maxlength="6" placeholder="MÃ PHÒNG">
+        <button id="btn-join-room" class="menu-btn" style="flex:0 0 auto; padding:14px 18px;">VÀO</button>
+      </div>
+
+      <div id="mp-error" class="mp-error"></div>
+      <div id="mp-status" class="mp-status"></div>
+    </div>
+
+    <div class="menu-buttons">
+      <button id="btn-help" class="menu-btn">❓ HƯỚNG DẪN</button>
+    </div>
+    <div class="version">v2.0 | LAN &amp; Online Multiplayer</div>
+  </div>
+
+  <div id="help-screen" style="display:none;">
+    <h2>📖 HƯỚNG DẪN</h2>
+    <div class="help-content">
+      <div class="help-item"><span class="help-icon">👆</span><span>Joystick trái: Di chuyển</span></div>
+      <div class="help-item"><span class="help-icon">👆</span><span>Vuốt màn hình: Xoay camera</span></div>
+      <div class="help-item"><span class="help-icon">🔘</span><span>Nút TƯƠNG TÁC: Làm việc</span></div>
+      <div class="help-item"><span class="help-icon">🎯</span><span>Nhiệm vụ: Phục vụ khách</span></div>
+      <div class="help-item"><span class="help-icon">🤝</span><span>Tạo phòng hoặc nhập mã để chơi cùng bạn bè</span></div>
+      <div class="help-item"><span class="help-icon">💬</span><span>Chat góc dưới bên trái để nói chuyện trong phòng</span></div>
+    </div>
+    <button id="btn-back" class="menu-btn">← QUAY LẠI</button>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <div id="hud" style="display:none;">
+    <div id="hud-top">
+      <div class="hud-stat"><span class="hud-icon">💰</span><span id="hud-money">0đ</span></div>
+      <div class="hud-stat"><span class="hud-icon">⭐</span><span id="hud-rep">100</span></div>
+      <div class="hud-stat"><span class="hud-icon">📅</span><span id="hud-day">Ngày 1</span></div>
+    </div>
+    <div id="hud-room">
+      <span id="hud-room-label">Phòng:</span>
+      <span id="hud-room-code">----</span>
+    </div>
+
+    <div id="leaderboard">
+      <div id="leaderboard-title">🏆 BXH DOANH THU</div>
+      <div id="leaderboard-list"></div>
+    </div>
+
+    <div id="hud-center">
+      <div id="crosshair">+</div>
+      <div id="interaction-prompt" style="display:none;"><span id="prompt-text">👆 Chạm để tương tác</span></div>
+    </div>
+
+    <div id="stun-overlay" style="display:none;">
+      <div id="stun-emoji">😵💫</div>
+      <div id="stun-text">Bạn bị trêu chọc!</div>
+    </div>
+
+    <div id="tease-btn" style="display:none;">😝 Trêu <span id="tease-target-name"></span></div>
+
+    <div id="emote-bar" class="collapsed">
+      <button class="emote-btn" data-emote="heart">❤️</button>
+      <button class="emote-btn" data-emote="angry">😡</button>
+      <button class="emote-btn" data-emote="cry">😭</button>
+      <button class="emote-btn" data-emote="gg">👏 GG</button>
+    </div>
+
+    <div id="hud-bottom">
+      <div id="joystick-zone"><div id="joystick-knob"></div></div>
+      <div id="action-buttons">
+        <button id="btn-emote-toggle" class="action-btn small">😀</button>
+        <button id="btn-action" class="action-btn">👋</button>
+      </div>
+    </div>
+
+    <!-- Nametags for other players get injected here as absolutely-positioned divs -->
+    <div id="nametag-layer"></div>
+  </div>
+
+  <div id="chat-box" class="collapsed">
+    <button id="chat-toggle">💬 Chat</button>
+    <div id="chat-log"></div>
+    <form id="chat-form">
+      <input id="chat-input" type="text" maxlength="200" placeholder="Nhắn gì đó..." autocomplete="off">
+      <button id="chat-send" type="submit">Gửi</button>
+    </form>
+  </div>
+
+  <div id="dialog-box" style="display:none;">
+    <div id="dialog-avatar">👨‍🎓</div>
+    <div id="dialog-content">
+      <div id="dialog-name">Sinh viên</div>
+      <div id="dialog-text">Cho em 1 ổ bánh mì thập cẩm!</div>
+      <div id="dialog-options"></div>
+    </div>
+  </div>
+
+  <div id="crafting-ui" style="display:none;">
+    <div class="crafting-header">
+      <h3 id="crafting-title">🥖 CHẾ BIẾN BÁNH MÌ</h3>
+      <button id="btn-close-craft" class="close-btn">✕</button>
+    </div>
+    <div id="craft-role-banner" style="display:none;"></div>
+    <div id="craft-cook-panel" style="display:none;"></div>
+    <div id="crafting-recipes"></div>
+  </div>
+
+  <div id="notification" style="display:none;">
+    <span id="notif-icon">💰</span><span id="notif-text">+15,000đ</span>
+  </div>
+</div>
+
+<!-- Socket.io client, served automatically by the socket.io server -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/map.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/network.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
